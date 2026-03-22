@@ -4,5 +4,5 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: process.env.VISE_BASE_PATH || "/stacking-game",
+  base: process.env.VITE_BASE_PATH || "/stacking-game",
 });
