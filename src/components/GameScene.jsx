@@ -198,25 +198,49 @@ function PerfectFlash({ trigger }) {
   const ambientRef = useRef();
   const dirRef = useRef();
   const tRef = useRef(0);
+  const baseAmbient = 0.6;
+  const baseDirectional = 0.6;
+  const flashColor = useRef(new THREE.Color("#fff7d1"));
+  const ambientBaseColor = useRef(new THREE.Color("#fffbe8"));
+  const directionalBaseColor = useRef(new THREE.Color("#ffffff"));
+  const workingColor = useRef(new THREE.Color());
 
   useEffect(() => {
     if (trigger > 0) tRef.current = 1;
   }, [trigger]);
 
   useFrame((_, delta) => {
-    if (tRef.current <= 0) return;
-    tRef.current = Math.max(0, tRef.current - delta * 12);
-    const v = tRef.current;
-    if (ambientRef.current) ambientRef.current.intensity = v * 3.5;
-    if (dirRef.current) dirRef.current.intensity = 0.6 + v * 2.0;
+    if (!ambientRef.current || !dirRef.current) return;
+
+    if (tRef.current <= 0) {
+      ambientRef.current.intensity = baseAmbient;
+      ambientRef.current.color.copy(ambientBaseColor.current);
+      dirRef.current.intensity = baseDirectional;
+      dirRef.current.color.copy(directionalBaseColor.current);
+      return;
+    }
+
+    // Ease-out cubic curve keeps the flash bright at the beginning and smooths the fade.
+    tRef.current = Math.max(0, tRef.current - delta * 2.8);
+    const eased = 1 - Math.pow(1 - tRef.current, 3);
+
+    workingColor.current
+      .copy(flashColor.current)
+      .lerp(ambientBaseColor.current, 1 - eased * 0.85);
+
+    ambientRef.current.intensity = baseAmbient + eased * 2.6;
+    ambientRef.current.color.copy(workingColor.current);
+
+    dirRef.current.intensity = baseDirectional + eased * 3.2;
+    dirRef.current.color.copy(workingColor.current);
   });
 
   return (
     <>
-      <ambientLight ref={ambientRef} intensity={0} color="#fffbe8" />
+      <ambientLight ref={ambientRef} intensity={baseAmbient} color="#fffbe8" />
       <directionalLight
         ref={dirRef}
-        intensity={0.6}
+        intensity={baseDirectional}
         position={[10, 20, 0]}
         color="#ffffff"
       />
