@@ -1,6 +1,6 @@
 # Stack Game — React + R3F + Cannon
 
-A fully converted Stack game using:
+Tech used:
 - **Vite** — build tool & dev server
 - **React 18** — UI framework
 - **@react-three/fiber** — React renderer for Three.js
